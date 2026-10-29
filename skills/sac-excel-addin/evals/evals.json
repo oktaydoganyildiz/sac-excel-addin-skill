@@ -1,0 +1,79 @@
+{
+  "skill_name": "sac-excel-addin",
+  "description": "Eval prompts for the sac-excel-addin skill. Each case lists facts a correct answer must contain (expectations) and claims it must not make (must_not). Facts were checked against SAP Help and SAP Note 3594453 on 2026-10-29.",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Convert this Analysis for Office formula to the SAP Analytics Cloud Excel add-in: =SAPGetData(\"DS_1\";\"Net Sales\";\"0COUNTRY=DE;0MATERIAL=M-01\")",
+      "expectations": [
+        "Uses SAP.GETDATA with dimension/member pairs as separate arguments",
+        "Treats the measure as a pair with the measure/account dimension ID, not as its own argument",
+        "Recommends member and dimension IDs instead of texts",
+        "Warns that dimensions not specified fall back to the panel filter, then the backend default",
+        "Mentions refreshing functions after filter changes (Refresh Sheet Functions / Refresh Selected Functions)"
+      ],
+      "must_not": [
+        "Keeps the AO 'Dim=Member;Dim=Member' string syntax inside SAP.GETDATA",
+        "Claims SAP.GETDATA only returns values visible in a table's navigation state"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "Our AO workbooks run VBA that calls SAPSetVariable and SAPSetFilter before refreshing. Can we move them to the SAC Excel add-in?",
+      "expectations": [
+        "Mentions the VBA bridge SAPOFXLA.xlam from SAP Note 3594453 (Excel desktop only)",
+        "States the SAC add-in VBA API has no method to set filter or variable values programmatically; only dialogs (ShowPromptsForWorkbook/ShowPromptsForDataSources/SelectDimensionFilter)",
+        "Suggests a redesign, e.g. cell-driven SAP.OVERWRITEDIMENSIONFILTER plus RefreshTable/RefreshAll"
+      ],
+      "must_not": [
+        "Claims the SAC add-in supports no VBA at all",
+        "Invents SAC VBA methods such as SetFilter or SetVariable"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "We plan on BPC and use BW-IP planning sequences from Analysis for Office. Should we switch to the SAC add-in?",
+      "expectations": [
+        "States BPC is not a supported data source for the SAC add-in",
+        "States BW-IP planning functions/sequences have no SAC add-in equivalent; SAC uses data action / multi action triggers",
+        "Recommends keeping these workbooks on Analysis for Office"
+      ],
+      "must_not": [
+        "Says BPC can be connected via a tunnel connection in the SAC add-in"
+      ]
+    },
+    {
+      "id": 4,
+      "prompt": "Users on tenant https://acme.eu10.analytics.cloud.sap get a disabled Go! button in the SAC Excel add-in. What do we check?",
+      "expectations": [
+        "Explains non-standard domains (anything other than hcs.cloud.sap) need Microsoft 365 admin configuration via Set-OrganizationAddInOverrides with ProductId 8a512e2b-c04e-4c06-9235-11b6cd59f584",
+        "Mentions checking Trusted Origins in SAC (System > Administration > App Integration), including manually adding https://*.cloud.microsoft",
+        "Mentions clearing the add-in cache for users who loaded it before the configuration"
+      ],
+      "must_not": [
+        "Lists https://*.excel.cloud.microsoft as the required trusted origin"
+      ]
+    },
+    {
+      "id": 5,
+      "prompt": "Write a VBA macro that refreshes the workbook and then publishes the planning data automatically every morning.",
+      "expectations": [
+        "Uses SAPOFXLA.VBAAPI.RefreshAll and PublishData with the workbook name",
+        "Warns that PublishData writes to the public version and asks the user to confirm this behaviour or adds an explicit confirmation step",
+        "Notes VBA works only in Excel desktop (Windows/Mac) and async is required on Mac"
+      ],
+      "must_not": [
+        "Embeds credentials or tokens in the macro"
+      ]
+    },
+    {
+      "id": 6,
+      "prompt": "My SAC add-in table crashes when I add more dimensions; it has about 1.5 million cells.",
+      "expectations": [
+        "Explains the ~4 GB WebView2/WebKit2 memory limit hit around 0.5-1 million cells",
+        "Recommends high-volume mode (up to ~10 million cells) and lists its restrictions (no planning, styling, comments, number format tab)"
+      ],
+      "must_not": []
+    }
+  ]
+}
